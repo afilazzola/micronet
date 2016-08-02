@@ -1,0 +1,96 @@
+---
+title:
+author: "Alex Filazzola, Diego Sotomayor, Christopher Lortie"
+date: "August 2016"
+output:
+  html_document:
+    theme: yeti
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+## Micronet
+
+Tracking the consequences of environmental change requires information on both the physical and biological characteristics of ecological systems. Large-scale environmental data are now widely available from many data repositories. However, these data sets often need to be down-scaled in order to be paired with local ecological measurements. Hence, micro-environmental sensors are sometimes useful to integrate scales of ecological information relevant to global change. This is an open-source, collaborative network of micro-environmental sensors deployed globally.
+
+[micronet](http://micronet.io/)
+
+[ecoblender](http://ecoblender.org)
+
+![](./microimage.jpg)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### load functions
+```{r echo=TRUE}
+# combine multiple csv files into one dataframe ###
+concat <- function(fileList){
+dflist <- data.frame() ## create empty dataframe
+for(i in 1:length(fileList)){
+loadfile<-read.csv(fileList[i]) ## read each csv file for loop
+loggerID <- basename(fileList[i]) ## root file name
+loggerID = substr(loggerID, 1, nchar(loggerID)-4) ## drop csv
+loadfile[,"loggerID"] <- rep(loggerID,nrow(loadfile)) ## add logger ID to column
+dflist<-rbind(dflist,loadfile) ## concatenate previous csv to main dataframe
+}
+return(dflist)
+}
+
+## calculates summary statistics of logger data
+## includes minimum, maximum, mean, standard deviation, number of observations, start date of logger, end date of logger, duration of logger recording, and response variable.
+
+summary.stat <- function(fileList, resp){
+dflist <- data.frame() ## create empty dataframe
+## combine into one dataframe
+for(i in 1:length(fileList)){
+loadfile<-read.csv(fileList[i]) ## read each csv file for loop
+loggerID <- basename(fileList[i]) ## root file name
+loggerID = substr(loggerID, 1, nchar(loggerID)-4) ## drop csv
+## add detailed time statistics
+t.str <- strptime(loadfile[,"Date"], "%m/%d/%Y %H:%M")
+loadfile[,"days"] <- as.Date(format(t.str, "%m/%d/%Y"), "%m/%d/%Y") ## separate date
+loadfile[,"hours"] <- as.numeric(format(t.str, "%H")) ##specify hour logged
+loadfile[,"minutes"] <- as.numeric(format(t.str, "%M")) ## specify minutes logged
+obs <- nrow(loadfile) ## number of observations
+start.date <- min(loadfile[,"days"]) ## day logger first started
+end.date <- max(loadfile[,"days"]) ## day logger ended
+duration <- as.numeric(difftime(end.date,start.date)) ## duration of logger activity
+resp.stat <- function(fileList, resp){
+resp.min <- min(fileList[,resp]) ## minimum of response
+resp.max <- max(fileList[,resp]) ## maximum of response
+resp.mean <- mean(fileList[,resp]) ## mean of response
+resp.sd <- mean(fileList[,resp]) ## standard deviation of response
+sum.stat <- data.frame(resp.min,resp.max,resp.mean,resp.sd,obs,start.date,end.date,duration,resp)
+colnames(sum.stat) <- c("min","max","mean","sd","observations","start.date","end.date","duration","Response")
+return(sum.stat)
+}
+sum.stat <- resp.stat(loadfile, resp)
+sum.stat[,"loggerID"] <- loggerID
+dflist <- rbind(dflist, sum.stat)
+}
+return(dflist)
+}
+```
+
+### summary stats on sample data
+```{r}
+
+## load hobo data files
+fileList<-list.files("sample.data\\",pattern=".csv$",full=T)
+
+## view file list
+fileList
+
+## extract summary statistics of light data
+Temp.summary <- summary.stat(fileList, "Temperature")
+Luxavg.summary <- summary.stat(fileList, "Avg.light")
+Luxmax.summary <- summary.stat(fileList, "Max.light")
+Total.summary <- rbind(Temp.summary,Luxavg.summary,Luxmax.summary)
+Total.summary
+
+
+
