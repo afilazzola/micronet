@@ -91,6 +91,52 @@ Luxavg.summary <- summary.stat(fileList, "Avg.light")
 Luxmax.summary <- summary.stat(fileList, "Max.light")
 Total.summary <- rbind(Temp.summary,Luxavg.summary,Luxmax.summary)
 Total.summary
+```
 
+### combining multiple dataframes
+```{r}
+data.hobo <- concat(fileList)
+str(data.hobo)
+head(data.hobo,10)
+tail(data.hobo,10)
+```
 
+### separate hours from the date column
+``` {r}
+## separate date from hours and minutes
+t.str <- strptime(data.hobo[,"Date"], "%m/%d/%Y %H:%M") ## format is month/day/year hour:minute
+data.hobo[,"days"] <- as.Date(format(t.str, "%m/%d/%Y"), "%m/%d/%Y") ## separate date
+data.hobo[,"hours"] <- as.numeric(format(t.str, "%H")) ##specify hour logged
+data.hobo[,"minutes"] <- as.numeric(format(t.str, "%M")) ## specify minutes logged
+head(data.hobo, 10)
+```
+### extracting specific statistics
+```{r warning=FALSE, message=FALSE}
+library(dplyr)
+data.means <- data.hobo %>% group_by(loggerID, hours)  %>%  summarise(Temp=mean(Temperature),Light=mean(Avg.light))
+data.means <- data.frame(data.means)
+data.sd <- data.hobo %>% group_by(loggerID, hours)  %>%  summarise(Temp=sd(Temperature),Light=sd(Avg.light))
+data.sd <- data.frame(data.sd)
 
+data.means
+data.sd
+
+```
+
+### selecting for time frames
+```{r}
+## subset for mid day temperatures and light
+mid.day <- subset(data.hobo, hours < 16 & hours > 8) #between 10-14
+##summarize mid day values
+mid.day.means <- mid.day %>% group_by(loggerID)  %>%  summarise(Temp=mean(Temperature),Light=mean(Avg.light))
+mid.day.means <- data.frame(mid.day.means)
+mid.day.sd <- mid.day %>% group_by(loggerID)  %>%  summarise(Temp=sd(Temperature),Light=sd(Avg.light))
+mid.day.sd <- data.frame(mid.day.sd)
+mid.day.means
+mid.day.sd
+```
+
+### plot 
+``` {r}
+
+```

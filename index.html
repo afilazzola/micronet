@@ -307,6 +307,230 @@ Total.summary</code></pre>
 ## 14 2014-02-03      278   Max.light   Doro_ground
 ## 15 2014-02-03      278   Max.light         Earth</code></pre>
 </div>
+<div id="combining-multiple-dataframes" class="section level3">
+<h3>combining multiple dataframes</h3>
+<pre class="r"><code>data.hobo &lt;- concat(fileList)
+str(data.hobo)</code></pre>
+<pre><code>## 'data.frame':    16702 obs. of  6 variables:
+##  $ ID         : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ Date       : Factor w/ 3481 levels &quot;1/1/2014 0:00&quot;,..: 1369 1370 1371 1372 1373 1374 1375 1381 1384 1385 ...
+##  $ Temperature: num  25.7 25.1 19.9 17.9 15.3 ...
+##  $ Avg.light  : num  43.1 0 0 0 0 0 0 0 0 0 ...
+##  $ Max.light  : num  43.1 0 0 0 0 0 0 0 0 0 ...
+##  $ loggerID   : chr  &quot;Allan_Laroque&quot; &quot;Allan_Laroque&quot; &quot;Allan_Laroque&quot; &quot;Allan_Laroque&quot; ...</code></pre>
+<pre class="r"><code>head(data.hobo,10)</code></pre>
+<pre><code>##    ID            Date Temperature Avg.light Max.light      loggerID
+## 1   1 4/19/2013 12:00      25.708      43.1      43.1 Allan_Laroque
+## 2   2 4/19/2013 14:00      25.125       0.0       0.0 Allan_Laroque
+## 3   3 4/19/2013 16:00      19.853       0.0       0.0 Allan_Laroque
+## 4   4 4/19/2013 18:00      17.950       0.0       0.0 Allan_Laroque
+## 5   5 4/19/2013 20:00      15.282       0.0       0.0 Allan_Laroque
+## 6   6 4/19/2013 22:00      12.690       0.0       0.0 Allan_Laroque
+## 7   7  4/20/2013 0:00      10.748       0.0       0.0 Allan_Laroque
+## 8   8  4/20/2013 2:00       9.275       0.0       0.0 Allan_Laroque
+## 9   9  4/20/2013 4:00       7.882       0.0       0.0 Allan_Laroque
+## 10 10  4/20/2013 6:00       6.268       0.0       0.0 Allan_Laroque</code></pre>
+<pre class="r"><code>tail(data.hobo,10)</code></pre>
+<pre><code>##         ID           Date Temperature Avg.light Max.light loggerID
+## 16693 3331 2/2/2014 18:00      21.760         0         0    Earth
+## 16694 3332 2/2/2014 20:00      21.760         0         0    Earth
+## 16695 3333 2/2/2014 22:00      21.760         0         0    Earth
+## 16696 3334  2/3/2014 0:00      21.664         0         0    Earth
+## 16697 3335  2/3/2014 2:00      21.664         0         0    Earth
+## 16698 3336  2/3/2014 4:00      21.664         0         0    Earth
+## 16699 3337  2/3/2014 6:00      21.664         0         0    Earth
+## 16700 3338  2/3/2014 8:00      21.569         0         0    Earth
+## 16701 3339 2/3/2014 10:00      21.664         0         0    Earth
+## 16702 3340 2/3/2014 12:00      21.760         0         0    Earth</code></pre>
+</div>
+<div id="separate-hours-from-the-date-column" class="section level3">
+<h3>separate hours from the date column</h3>
+<pre class="r"><code>## separate date from hours and minutes
+t.str &lt;- strptime(data.hobo[,&quot;Date&quot;], &quot;%m/%d/%Y %H:%M&quot;) ## format is month/day/year hour:minute
+data.hobo[,&quot;days&quot;] &lt;- as.Date(format(t.str, &quot;%m/%d/%Y&quot;), &quot;%m/%d/%Y&quot;) ## separate date
+data.hobo[,&quot;hours&quot;] &lt;- as.numeric(format(t.str, &quot;%H&quot;)) ##specify hour logged
+data.hobo[,&quot;minutes&quot;] &lt;- as.numeric(format(t.str, &quot;%M&quot;)) ## specify minutes logged
+head(data.hobo, 10)</code></pre>
+<pre><code>##    ID            Date Temperature Avg.light Max.light      loggerID
+## 1   1 4/19/2013 12:00      25.708      43.1      43.1 Allan_Laroque
+## 2   2 4/19/2013 14:00      25.125       0.0       0.0 Allan_Laroque
+## 3   3 4/19/2013 16:00      19.853       0.0       0.0 Allan_Laroque
+## 4   4 4/19/2013 18:00      17.950       0.0       0.0 Allan_Laroque
+## 5   5 4/19/2013 20:00      15.282       0.0       0.0 Allan_Laroque
+## 6   6 4/19/2013 22:00      12.690       0.0       0.0 Allan_Laroque
+## 7   7  4/20/2013 0:00      10.748       0.0       0.0 Allan_Laroque
+## 8   8  4/20/2013 2:00       9.275       0.0       0.0 Allan_Laroque
+## 9   9  4/20/2013 4:00       7.882       0.0       0.0 Allan_Laroque
+## 10 10  4/20/2013 6:00       6.268       0.0       0.0 Allan_Laroque
+##          days hours minutes
+## 1  2013-04-19    12       0
+## 2  2013-04-19    14       0
+## 3  2013-04-19    16       0
+## 4  2013-04-19    18       0
+## 5  2013-04-19    20       0
+## 6  2013-04-19    22       0
+## 7  2013-04-20     0       0
+## 8  2013-04-20     2       0
+## 9  2013-04-20     4       0
+## 10 2013-04-20     6       0</code></pre>
+</div>
+<div id="extracting-specific-statistics" class="section level3">
+<h3>extracting specific statistics</h3>
+<pre class="r"><code>library(dplyr)
+data.means &lt;- data.hobo %&gt;% group_by(loggerID, hours)  %&gt;%  summarise(Temp=mean(Temperature),Light=mean(Avg.light))
+data.means &lt;- data.frame(data.means)
+data.sd &lt;- data.hobo %&gt;% group_by(loggerID, hours)  %&gt;%  summarise(Temp=sd(Temperature),Light=sd(Avg.light))
+data.sd &lt;- data.frame(data.sd)
+
+data.means</code></pre>
+<pre><code>##         loggerID hours     Temp        Light
+## 1  Allan_Laroque     0 16.33226 3.884892e-02
+## 2  Allan_Laroque     2 15.86632 0.000000e+00
+## 3  Allan_Laroque     4 15.44694 0.000000e+00
+## 4  Allan_Laroque     6 15.42670 1.035509e+03
+## 5  Allan_Laroque     8 17.51994 8.193466e+03
+## 6  Allan_Laroque    10 19.05345 6.918788e+03
+## 7  Allan_Laroque    12 19.95085 1.315911e+04
+## 8  Allan_Laroque    14 20.26105 1.110597e+04
+## 9  Allan_Laroque    16 19.85099 4.849492e+03
+## 10 Allan_Laroque    18 18.57063 9.511272e+02
+## 11 Allan_Laroque    20 17.54351 9.992473e+00
+## 12 Allan_Laroque    22 16.86679 0.000000e+00
+## 13        Carrot     0 16.82263 0.000000e+00
+## 14        Carrot     2 16.20739 0.000000e+00
+## 15        Carrot     4 15.72073 0.000000e+00
+## 16        Carrot     6 15.39554 4.072953e+02
+## 17        Carrot     8 17.65499 1.310946e+04
+## 18        Carrot    10 21.73332 5.327072e+04
+## 19        Carrot    12 23.18673 2.713123e+04
+## 20        Carrot    14 24.80014 6.050654e+04
+## 21        Carrot    16 24.91188 5.148824e+04
+## 22        Carrot    18 22.74586 2.203049e+04
+## 23        Carrot    20 19.01715 2.271777e+03
+## 24        Carrot    22 17.49219 0.000000e+00
+## 25  Charles_Sule     0 16.98273 3.884892e-02
+## 26  Charles_Sule     2 16.38139 0.000000e+00
+## 27  Charles_Sule     4 15.91030 0.000000e+00
+## 28  Charles_Sule     6 15.56310 4.616161e+02
+## 29  Charles_Sule     8 18.76927 2.459781e+04
+## 30  Charles_Sule    10 23.88400 6.695851e+04
+## 31  Charles_Sule    12 25.63530 8.205698e+04
+## 32  Charles_Sule    14 25.11787 6.741514e+04
+## 33  Charles_Sule    16 23.88458 3.885798e+04
+## 34  Charles_Sule    18 20.91928 1.122824e+04
+## 35  Charles_Sule    20 18.61054 1.743957e+03
+## 36  Charles_Sule    22 17.58751 3.884892e-02
+## 37   Doro_ground     0 19.19254 0.000000e+00
+## 38   Doro_ground     2 18.76200 0.000000e+00
+## 39   Doro_ground     4 18.37085 0.000000e+00
+## 40   Doro_ground     6 18.03445 1.906283e+02
+## 41   Doro_ground     8 19.23100 4.393700e+03
+## 42   Doro_ground    10 24.11629 3.466917e+04
+## 43   Doro_ground    12 26.68005 5.174972e+04
+## 44   Doro_ground    14 27.14960 5.277906e+04
+## 45   Doro_ground    16 26.48112 3.752684e+04
+## 46   Doro_ground    18 21.98922 3.864414e+03
+## 47   Doro_ground    20 20.72215 7.474730e+02
+## 48   Doro_ground    22 19.73769 0.000000e+00
+## 49         Earth     0 15.43738 0.000000e+00
+## 50         Earth     2 14.81946 0.000000e+00
+## 51         Earth     4 14.27596 0.000000e+00
+## 52         Earth     6 14.00567 3.029344e+02
+## 53         Earth     8 17.29656 1.246227e+04
+## 54         Earth    10 22.37986 4.079136e+04
+## 55         Earth    12 24.27305 4.806232e+04
+## 56         Earth    14 24.48792 4.491603e+04
+## 57         Earth    16 24.93144 5.563345e+04
+## 58         Earth    18 23.24071 3.521375e+04
+## 59         Earth    20 18.34003 1.821471e+03
+## 60         Earth    22 16.35201 0.000000e+00</code></pre>
+<pre class="r"><code>data.sd</code></pre>
+<pre><code>##         loggerID hours     Temp        Light
+## 1  Allan_Laroque     0 6.083287     0.647741
+## 2  Allan_Laroque     2 6.256459     0.000000
+## 3  Allan_Laroque     4 6.417607     0.000000
+## 4  Allan_Laroque     6 6.403942  1931.242551
+## 5  Allan_Laroque     8 6.496987 17454.135864
+## 6  Allan_Laroque    10 6.112838 13240.339420
+## 7  Allan_Laroque    12 6.010598 37675.341556
+## 8  Allan_Laroque    14 5.626673 29787.342150
+## 9  Allan_Laroque    16 5.457454 13558.595433
+## 10 Allan_Laroque    18 5.697478  1829.999804
+## 11 Allan_Laroque    20 5.867986    30.254032
+## 12 Allan_Laroque    22 5.949522     0.000000
+## 13        Carrot     0 6.039332     0.000000
+## 14        Carrot     2 6.215264     0.000000
+## 15        Carrot     4 6.421454     0.000000
+## 16        Carrot     6 6.476811   760.986960
+## 17        Carrot     8 6.741227 17809.635900
+## 18        Carrot    10 7.362892 59252.280957
+## 19        Carrot    12 7.305928 35237.412857
+## 20        Carrot    14 7.849575 69106.170675
+## 21        Carrot    16 8.191904 55620.775234
+## 22        Carrot    18 7.584840 25999.009043
+## 23        Carrot    20 6.186600  3882.195520
+## 24        Carrot    22 5.982967     0.000000
+## 25  Charles_Sule     0 5.755546     0.647741
+## 26  Charles_Sule     2 5.969984     0.000000
+## 27  Charles_Sule     4 6.133554     0.000000
+## 28  Charles_Sule     6 6.200232   856.057026
+## 29  Charles_Sule     8 7.090724 33811.308243
+## 30  Charles_Sule    10 7.176639 64314.161881
+## 31  Charles_Sule    12 7.727971 76735.864629
+## 32  Charles_Sule    14 7.411592 65506.416244
+## 33  Charles_Sule    16 7.243685 39341.890829
+## 34  Charles_Sule    18 6.285368 13582.556279
+## 35  Charles_Sule    20 5.799866  2554.385468
+## 36  Charles_Sule    22 5.708222     0.647741
+## 37   Doro_ground     0 4.300381     0.000000
+## 38   Doro_ground     2 4.531297     0.000000
+## 39   Doro_ground     4 4.828079     0.000000
+## 40   Doro_ground     6 5.050642   352.236451
+## 41   Doro_ground     8 4.176377  5675.016165
+## 42   Doro_ground    10 5.934247 46475.549034
+## 43   Doro_ground    12 7.763976 69986.259697
+## 44   Doro_ground    14 7.977975 73418.860663
+## 45   Doro_ground    16 6.986028 51772.358683
+## 46   Doro_ground    18 3.537186  5029.900372
+## 47   Doro_ground    20 3.717679  1147.642865
+## 48   Doro_ground    22 3.991480     0.000000
+## 49         Earth     0 6.863501     0.000000
+## 50         Earth     2 7.042609     0.000000
+## 51         Earth     4 7.251753     0.000000
+## 52         Earth     6 7.299002   637.479190
+## 53         Earth     8 7.492775 16890.950219
+## 54         Earth    10 7.931364 45683.796276
+## 55         Earth    12 8.008014 57330.753138
+## 56         Earth    14 7.159379 58606.372134
+## 57         Earth    16 7.801155 69847.904630
+## 58         Earth    18 8.278024 49825.340266
+## 59         Earth    20 6.715969  2962.402805
+## 60         Earth    22 6.722380     0.000000</code></pre>
+</div>
+<div id="selecting-for-time-frames" class="section level3">
+<h3>selecting for time frames</h3>
+<pre class="r"><code>## subset for mid day temperatures and light
+mid.day &lt;- subset(data.hobo, hours &lt; 16 &amp; hours &gt; 8) #between 10-14
+##summarize mid day values
+mid.day.means &lt;- mid.day %&gt;% group_by(loggerID)  %&gt;%  summarise(Temp=mean(Temperature),Light=mean(Avg.light))
+mid.day.means &lt;- data.frame(mid.day.means)
+mid.day.sd &lt;- mid.day %&gt;% group_by(loggerID)  %&gt;%  summarise(Temp=sd(Temperature),Light=sd(Avg.light))
+mid.day.sd &lt;- data.frame(mid.day.sd)
+mid.day.means</code></pre>
+<pre><code>##        loggerID     Temp    Light
+## 1 Allan_Laroque 19.75596 10398.78
+## 2        Carrot 23.23820 46953.31
+## 3  Charles_Sule 24.87877 72149.20
+## 4   Doro_ground 25.98058 46391.69
+## 5         Earth 23.71269 44589.51</code></pre>
+<pre class="r"><code>mid.day.sd</code></pre>
+<pre><code>##        loggerID     Temp    Light
+## 1 Allan_Laroque 5.935208 28859.75
+## 2        Carrot 7.604606 58071.60
+## 3  Charles_Sule 7.469578 69356.63
+## 4   Doro_ground 7.395105 64862.37
+## 5         Earth 7.758642 54198.09</code></pre>
+</div>
 </div>
 
 
