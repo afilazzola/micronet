@@ -74,6 +74,9 @@ dflist <- rbind(dflist, sum.stat)
 }
 return(dflist)
 }
+
+## error bar functions
+source("errorbar.functions.r")
 ```
 
 ### summary stats on sample data
@@ -113,14 +116,27 @@ head(data.hobo, 10)
 ### extracting specific statistics
 ```{r warning=FALSE, message=FALSE}
 library(dplyr)
-data.means <- data.hobo %>% group_by(loggerID, hours)  %>%  summarise(Temp=mean(Temperature),Light=mean(Avg.light))
-data.means <- data.frame(data.means)
-data.sd <- data.hobo %>% group_by(loggerID, hours)  %>%  summarise(Temp=sd(Temperature),Light=sd(Avg.light))
-data.sd <- data.frame(data.sd)
+## extract mean and standard error for loggers and hour of day
+data.hourly <- data.hobo %>% group_by(loggerID, hours)  %>%  summarise(Temp=mean(Temperature),Light=mean(Avg.light),Temp.se=se(Temperature),Light.se=se(Avg.light))
+data.hourly <- data.frame(data.hourly)
 
-data.means
-data.sd
+data.hourly
+```
 
+### plot 
+``` {r fig.width=8}
+## select one logger to plot
+Carrot.logger <- subset(data.hourly, loggerID=="Carrot")
+par(mfrow=c(1,2)) ## side by side plots
+
+## plot the light radiation on average for each hour of the day during the season
+plot(Carrot.logger[,"hours"],Carrot.logger[,"Light"], pch=21, bg="White", ylab="Light (lux)", xlab="hour of the day", ylim=c(0,65000))
+error.bar(Carrot.logger[,"hours"],Carrot.logger[,"Light"],Carrot.logger[,"Light.se"])
+points(Carrot.logger[,"hours"],Carrot.logger[,"Light"], pch=21, bg="White") ## repeat to cover lines
+
+## plot the temperature on average for each hour of the day during the season
+plot(Carrot.logger[,"hours"],Carrot.logger[,"Temp"], pch=21, bg="Black", ylab="Temperature (C°)", xlab="hour of the day", ylim=c(12,28))
+error.bar(Carrot.logger[,"hours"],Carrot.logger[,"Temp"],Carrot.logger[,"Temp.se"])
 ```
 
 ### selecting for time frames
@@ -128,15 +144,10 @@ data.sd
 ## subset for mid day temperatures and light
 mid.day <- subset(data.hobo, hours < 16 & hours > 8) #between 10-14
 ##summarize mid day values
-mid.day.means <- mid.day %>% group_by(loggerID)  %>%  summarise(Temp=mean(Temperature),Light=mean(Avg.light))
+mid.day.means <- mid.day %>% group_by(loggerID)  %>%  summarise(Temp=mean(Temperature),Light=mean(Avg.light),Temp.se=se(Temperature),Light.se=se(Avg.light))
 mid.day.means <- data.frame(mid.day.means)
-mid.day.sd <- mid.day %>% group_by(loggerID)  %>%  summarise(Temp=sd(Temperature),Light=sd(Avg.light))
-mid.day.sd <- data.frame(mid.day.sd)
 mid.day.means
-mid.day.sd
-```
-
-### plot 
-``` {r}
 
 ```
+
+
